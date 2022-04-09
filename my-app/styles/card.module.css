@@ -1,0 +1,15 @@
+.card{
+  background: #f2b3b3;
+  box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 315px;
+  margin: 2em;
+  border-radius: 10px;
+  display: inline-block;
+}
+
+.title {
+  font-size: 24px;
+  margin: 0;
+  display: table-cell;
+}

@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Web3Modal from "web3modal";
 import { abi, NFT_CONTRACT_ADDRESS } from "../constants";
 import styles from "../styles/Home.module.css";
-
+import Card from "./api/card";
 export default function Home() {
   // walletConnected keep track of whether the user's wallet is connected or not
   const [walletConnected, setWalletConnected] = useState(false);
@@ -20,6 +20,12 @@ export default function Home() {
   const [tokenIdsMinted, setTokenIdsMinted] = useState("0");
   // Create a reference to the Web3 Modal (used for connecting to Metamask) which persists as long as the page is open
   const web3ModalRef = useRef();
+  // to store nfts
+  const [cryptoDevNfts, setCryptoDevNfts] = useState([]);
+  const [yourNfts, setYourNfts] = useState([]);
+  const [account, setAccount] = useState("");
+  const [errorMessage, setErrorMessage] = useState(null);
+
 
   /**
    * presaleMint: Mint an NFT during the presale
@@ -254,7 +260,34 @@ export default function Home() {
     }
     return web3Provider;
   };
+  //fetching NFTs from opensea 
+    const getAllNft = async () =>{
 
+     // setLoadingNft(true);
+     // setErrorMessage(null);
+
+     const signer = await getProviderOrSigner(true);
+      // Get the address associated to the signer which is connected to  MetaMask
+      const address = await signer.getAddress();
+      const url = "https://testnets-api.opensea.io/api/v1/assets?order_direction=desc&offset=0&limit=20&owner="+address;
+      //getUser Nfts
+      fetch(url)              
+      .then((res) => res.json())
+                      .then((json) => {                       
+                       
+                          setYourNfts(json.assets);
+                          console.log(json.assets);
+                          setLoading(false);
+                        })
+      // getCrypto dev Nfs
+      
+      fetch(`https://testnets-api.opensea.io/api/v1/assets?order_direction=desc&offset=0&limit=20&asset_contract_addresses=0xb3b147acad0cd491f12cb4c49fb03e328296cde3`)
+      .then((res)=>res.json())
+      .then((data) =>{
+      setCryptoDevNfts(data.assets);
+      })                      
+
+    };
   // useEffects are used to react to changes in state of the website
   // The array at the end of function call represents what state changes will trigger this effect
   // In this case, whenever the value of `walletConnected` changes - this effect will be called
@@ -288,6 +321,8 @@ export default function Home() {
           }
         }
       }, 5 * 1000);
+
+      getAllNft();
 
       // set an interval to get the number of token Ids minted every 5 seconds
       setInterval(async function () {
@@ -380,6 +415,16 @@ export default function Home() {
         </div>
       </div>
 
+      <h1> Your Nfts</h1>
+      {yourNfts.map((nft,index) => (<Card key={index} name={nft.name} imageUrl={nft.image_original_url} />)) }
+
+      <h1> Crypto-Dev NFT Collection</h1>
+      {cryptoDevNfts.map((nft,index) => (<Card key={index} name={nft.name} imageUrl={nft.image_original_url} />)) }
+
+
+        
+     
+     
       <footer className={styles.footer}>
         Made with &#10084; by Crypto Devs
       </footer>
